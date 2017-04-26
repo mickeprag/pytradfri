@@ -2,6 +2,7 @@
 import json
 import logging
 import subprocess
+import six
 from time import time
 
 from .error import RequestError, ClientError, ServerError, RequestTimeout
@@ -12,6 +13,10 @@ _LOGGER = logging.getLogger(__name__)
 CLIENT_ERROR_PREFIX = '4.'
 SERVER_ERROR_PREFIX = '5.'
 
+if not hasattr(subprocess, 'TimeoutExpired'):
+    class TimeoutExpired(Exception):
+        pass
+    subprocess.TimeoutExpired = TimeoutExpired
 
 def api_factory(host, security_code):
     """Generate a request method."""
@@ -32,18 +37,18 @@ def api_factory(host, security_code):
         path = '/'.join(str(v) for v in path)
         return 'coaps://{}:5684/{}'.format(host, path)
 
-    def request(method, path, data=None, *, parse_json=True, timeout=10):
+    def request(method, path, data=None, parse_json=True, timeout=10):
         """Make a request."""
         command = base_command(method)
 
         kwargs = {
-            'stderr': subprocess.DEVNULL,
-            'timeout': timeout,
+            'stderr': subprocess.PIPE,
             'universal_newlines': True,
         }
+        kwargs2 = {'timeout':timeout} if six.PY3 else {}
 
         if data is not None:
-            kwargs['input'] = json.dumps(data)
+            kwargs2['input'] = json.dumps(data)
             command.append('-f')
             command.append('-')
             _LOGGER.debug('Executing %s %s %s: %s', host, method, path, data)
@@ -53,12 +58,13 @@ def api_factory(host, security_code):
         command.append(url(path))
 
         try:
-            return_value = subprocess.check_output(command, **kwargs)
+            proc = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, **kwargs)
+            return_value, errs = proc.communicate(**kwargs2)
         except subprocess.TimeoutExpired:
-            raise RequestTimeout() from None
+            six.raise_from(RequestTimeout(), None)
         except subprocess.CalledProcessError as err:
-            raise RequestError(
-                'Error executing request: %s'.format(err)) from None
+            six.raise_from(RequestError(
+                'Error executing request: %s'.format(err)), None)
 
         return _process_output(return_value, parse_json)
 
@@ -73,8 +79,8 @@ def api_factory(host, security_code):
         try:
             proc = subprocess.Popen(command, **kwargs)
         except subprocess.CalledProcessError as err:
-            raise RequestError(
-                'Error executing request: %s'.format(err)) from None
+            six.raise_from(RequestError(
+                'Error executing request: %s'.format(err)), None)
 
         output = ''
         open_obj = 0

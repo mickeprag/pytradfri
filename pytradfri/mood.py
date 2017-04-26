@@ -5,7 +5,7 @@ from .resource import ApiResource
 
 class Mood(ApiResource):
     def __init__(self, api, raw, parent):
-        super().__init__(api, raw)
+        super(Mood,self).__init__(api, raw)
         self._parent = parent
 
     @property

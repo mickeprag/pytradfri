@@ -139,13 +139,13 @@ class LightControl:
         """Return raw data that it represents."""
         return self._device.raw[ATTR_LIGHT_CONTROL]
 
-    def set_state(self, state, *, index=0):
+    def set_state(self, state, index=0):
         """Set state of a light."""
         self.set_values({
             ATTR_LIGHT_STATE: int(state)
         }, index=index)
 
-    def set_dimmer(self, dimmer, *, index=0):
+    def set_dimmer(self, dimmer, index=0):
         """Set dimmer value of a light.
 
         Integer between 0..255
@@ -154,20 +154,20 @@ class LightControl:
             ATTR_LIGHT_DIMMER: dimmer,
         }, index=index)
 
-    def set_hex_color(self, color, *, index=0):
+    def set_hex_color(self, color, index=0):
         """Set xy color of the light."""
         self.set_values({
             ATTR_LIGHT_COLOR: color,
         }, index=index)
 
-    def set_xy_color(self, color_x, color_y, *, index=0):
+    def set_xy_color(self, color_x, color_y, index=0):
         """Set xy color of the light."""
         self.set_values({
             ATTR_LIGHT_COLOR_X: color_x,
             ATTR_LIGHT_COLOR_Y: color_y
         }, index=index)
 
-    def set_values(self, values, *, index=0):
+    def set_values(self, values, index=0):
         """Set values on light control."""
         assert len(self.raw) == 1, \
             'Only devices with 1 light supported'

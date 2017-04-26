@@ -7,7 +7,7 @@ from .const import (
 )
 
 
-class ApiResource:
+class ApiResource(object):
     """Base object for resources returned from the gateway."""
 
     def __init__(self, api, raw):

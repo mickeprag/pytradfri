@@ -14,7 +14,7 @@ ATTR_MOOD = "9039"
 class Group(ApiResource):
     """Represent a group."""
     def __init__(self, gateway, raw):
-        super().__init__(gateway.api, raw)
+        super(Group,self).__init__(gateway.api, raw)
         self._gateway = gateway
 
     @property

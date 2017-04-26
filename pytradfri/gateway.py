@@ -54,7 +54,7 @@ class Gateway(object):
         return [self.get_mood(mood, mood_parent=mood_parent) for mood in
                 self.api('get', [ROOT_MOODS, mood_parent])]
 
-    def get_mood(self, mood_id, *, mood_parent=None):
+    def get_mood(self, mood_id, mood_parent=None, **kwargs):
         """Return a mood."""
         if mood_parent is None:
             mood_parent = self._get_mood_parent()
